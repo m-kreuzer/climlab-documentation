@@ -19,13 +19,16 @@
 \BOOKMARK [1][-]{section.5.1}{Preconfigured Energy Balance Models}{chapter.5}% 19
 \BOOKMARK [1][-]{section.5.2}{Boltzmann Outgoing Longwave Radiation}{chapter.5}% 20
 \BOOKMARK [1][-]{section.5.3}{Budyko Transport for Energy Balance Models}{chapter.5}% 21
-\BOOKMARK [0][-]{chapter.6}{Application Programming Interface}{}% 22
-\BOOKMARK [1][-]{section.6.1}{Subpackages}{chapter.6}% 23
-\BOOKMARK [1][-]{section.6.2}{Inheritance Diagram}{chapter.6}% 24
-\BOOKMARK [0][-]{chapter.7}{References}{}% 25
-\BOOKMARK [0][-]{chapter.8}{License}{}% 26
-\BOOKMARK [1][-]{section.8.1}{climlab}{chapter.8}% 27
-\BOOKMARK [1][-]{section.8.2}{Documentation}{chapter.8}% 28
-\BOOKMARK [0][-]{chapter.9}{Contact}{}% 29
-\BOOKMARK [1][-]{section.9.1}{climlab package}{chapter.9}% 30
-\BOOKMARK [1][-]{section.9.2}{climlab documentation}{chapter.9}% 31
+\BOOKMARK [1][-]{section.5.4}{Distribution of insolation}{chapter.5}% 22
+\BOOKMARK [1][-]{section.5.5}{The seasonal cycle of surface temperature}{chapter.5}% 23
+\BOOKMARK [1][-]{section.5.6}{Ice - Albedo Feedback and runaway glaciation}{chapter.5}% 24
+\BOOKMARK [0][-]{chapter.6}{Application Programming Interface}{}% 25
+\BOOKMARK [1][-]{section.6.1}{Subpackages}{chapter.6}% 26
+\BOOKMARK [1][-]{section.6.2}{Inheritance Diagram}{chapter.6}% 27
+\BOOKMARK [0][-]{chapter.7}{References}{}% 28
+\BOOKMARK [0][-]{chapter.8}{License}{}% 29
+\BOOKMARK [1][-]{section.8.1}{climlab}{chapter.8}% 30
+\BOOKMARK [1][-]{section.8.2}{Documentation}{chapter.8}% 31
+\BOOKMARK [0][-]{chapter.9}{Contact}{}% 32
+\BOOKMARK [1][-]{section.9.1}{climlab package}{chapter.9}% 33
+\BOOKMARK [1][-]{section.9.2}{climlab documentation}{chapter.9}% 34

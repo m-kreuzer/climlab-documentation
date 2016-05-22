@@ -938,9 +938,7 @@ As noted in the {\hyperref[intro:introduction]{\emph{Introduction}}} (\autopager
 
 \chapter{Tutorials}
 \label{tutorial:tutorials}\label{tutorial::doc}\label{tutorial:tutorial}
-For a learning-by-doing approach, a couple of Tutorials come with the \emph{climlab} package. They can be found in the package's \emph{courseware} folder and are written in the Jupyter Notebook format. The first \emph{climlab} notebooks have been used for teaching some basics of climate science and had also the initial purpose to document the \code{climlab} package. \footnote[1]{
-As this documentation is part of a bachelor thesis, only tutorials by Moritz Kreuzer have been included in this version. In the future online version of the documentation there will be more tutorials included.
-}
+For a learning-by-doing approach, a couple of Tutorials come with the \emph{climlab} package. They can be found in the package's \emph{courseware} folder and are written in the Jupyter Notebook format. The first \emph{climlab} notebooks have been used for teaching some basics of climate science and had also the initial purpose to document the \code{climlab} package.
 
 \textbf{Example usage}
 
@@ -954,7 +952,7 @@ The notebooks are self-describing, and should all run out-of-the-box once the pa
 
 \textbf{Notebooks}
 
-A few notebooks which describe the basic usage of EBMs can be found here:
+A few notebooks which describe the basic usage of EBMs, can be found here:
 
 
 \section{Preconfigured Energy Balance Models}
@@ -1885,6 +1883,1128 @@ The temperature is a bit too cold for current climate as model
 parameters are not tuned. Sensitive parameters are \code{a0, a2, ai} and
 \code{Tf} (albedo), \code{A} and \code{B} (OLR), \code{b} (transport) and
 \code{num\_lat} (grid resolution).
+
+Some more notebooks which focus on specific aspects of Energy Balance Models:
+
+
+\section{Distribution of insolation}
+\label{notebooks/Insolation::doc}\label{notebooks/Insolation:Distribution-of-insolation}
+Here are some examples calculating daily average insolation at different
+locations and times.
+
+These all use a function called \code{daily\_insolation} in the module
+\code{insolation.py} to do the calculation. The code calculates daily
+average insolation anywhere on Earth at any time of year for a given set
+of orbital parameters.
+
+To look at past orbital variations and their effects on insolation, we
+use the module \code{orbital.py} which accesses tables of values for the
+past 5 million years. We can easily lookup parameters for any point in
+the past and pass these to \code{daily\_insolation}.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [1]: }\PYG{o}{\PYGZpc{}}\PYG{k}{matplotlib} inline
+        \PYG{k+kn}{import} \PYG{n+nn}{numpy} \PYG{k+kn}{as} \PYG{n+nn}{np}
+        \PYG{k+kn}{import} \PYG{n+nn}{matplotlib.pyplot} \PYG{k+kn}{as} \PYG{n+nn}{plt}
+        \PYG{k+kn}{import} \PYG{n+nn}{netCDF4} \PYG{k+kn}{as} \PYG{n+nn}{nc}
+        \PYG{k+kn}{from} \PYG{n+nn}{climlab} \PYG{k+kn}{import} \PYG{n}{constants} \PYG{k}{as} \PYG{n}{const}
+        \PYG{k+kn}{from} \PYG{n+nn}{climlab.solar.insolation} \PYG{k+kn}{import} \PYG{n}{daily\PYGZus{}insolation}
+        \PYG{k+kn}{from} \PYG{n+nn}{climlab.solar.orbital} \PYG{k+kn}{import} \PYG{n}{OrbitalTable}
+\end{OriginalVerbatim}
+
+
+\subsection{Present-day orbital parameters}
+\label{notebooks/Insolation:Present-day-orbital-parameters}
+Calculate an array of insolation over the year and all latitudes (for
+present-day orbital parameters).
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [2]: }\PYG{n}{lat} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{90.}\PYG{p}{,} \PYG{l+m+mf}{90.}\PYG{p}{,} \PYG{l+m+mf}{500.} \PYG{p}{)}
+        \PYG{n}{days} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{const}\PYG{o}{.}\PYG{n}{days\PYGZus{}per\PYGZus{}year}\PYG{p}{,} \PYG{l+m+mf}{365.} \PYG{p}{)}
+        \PYG{n}{Q} \PYG{o}{=} \PYG{n}{daily\PYGZus{}insolation}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{days} \PYG{p}{)}
+\end{OriginalVerbatim}
+
+And make a contour plot of Q as function of latitude and time of year.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [3]: }\PYG{n}{ax} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(} \PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{8}\PYG{p}{,}\PYG{l+m+mi}{6}\PYG{p}{)} \PYG{p}{)}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{111}\PYG{p}{)}
+        \PYG{n}{CS} \PYG{o}{=} \PYG{n}{ax}\PYG{o}{.}\PYG{n}{contour}\PYG{p}{(} \PYG{n}{days}\PYG{p}{,} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{Q} \PYG{p}{,} \PYG{n}{levels} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{l+m+mf}{0.}\PYG{p}{,} \PYG{l+m+mf}{600.}\PYG{p}{,} \PYG{l+m+mf}{50.}\PYG{p}{)} \PYG{p}{)}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{clabel}\PYG{p}{(}\PYG{n}{CS}\PYG{p}{,} \PYG{n}{CS}\PYG{o}{.}\PYG{n}{levels}\PYG{p}{,} \PYG{n}{inline}\PYG{o}{=}\PYG{n+nb+bp}{True}\PYG{p}{,} \PYG{n}{fmt}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+si}{\PYGZpc{}r}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{10}\PYG{p}{)}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Days since January 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{12} \PYG{p}{)}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{12} \PYG{p}{)}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Daily average insolation}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{20} \PYG{p}{)}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{contourf} \PYG{p}{(} \PYG{n}{days}\PYG{p}{,} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{Q}\PYG{p}{,} \PYG{n}{levels}\PYG{o}{=}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{500.}\PYG{p}{,} \PYG{l+m+mf}{0.}\PYG{p}{]} \PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Insolation_7_0}.png}
+
+Take the area-weighted global, annual average of Q...
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [4]: }\PYG{k}{print} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(} \PYG{n}{Q}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{1} \PYG{p}{)} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{cos}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{deg2rad}\PYG{p}{(}\PYG{n}{lat}\PYG{p}{)} \PYG{p}{)} \PYG{p}{)} \PYG{o}{/} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{cos}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{deg2rad}\PYG{p}{(} \PYG{n}{lat} \PYG{p}{)} \PYG{p}{)} \PYG{p}{)}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+341.384184481
+\end{OriginalVerbatim}
+Also plot the zonally averaged insolation at a few different times of
+the year:
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [5]: }\PYG{n}{summer\PYGZus{}solstice} \PYG{o}{=} \PYG{l+m+mi}{170}
+        \PYG{n}{winter\PYGZus{}solstice} \PYG{o}{=} \PYG{l+m+mi}{353}
+        \PYG{n}{ax} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(} \PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{5}\PYG{p}{,}\PYG{l+m+mi}{4}\PYG{p}{)} \PYG{p}{)}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{111}\PYG{p}{)}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{Q}\PYG{p}{[}\PYG{p}{:}\PYG{p}{,}\PYG{p}{(}\PYG{n}{summer\PYGZus{}solstice}\PYG{p}{,} \PYG{n}{winter\PYGZus{}solstice}\PYG{p}{)}\PYG{p}{]} \PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(}\PYG{n}{Q}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mi}{2} \PYG{p}{)}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xbound}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,} \PYG{l+m+mi}{90}\PYG{p}{)}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xticks}\PYG{p}{(} \PYG{n+nb}{range}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,}\PYG{l+m+mi}{100}\PYG{p}{,}\PYG{l+m+mi}{30}\PYG{p}{)} \PYG{p}{)}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16} \PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Insolation (W m\PYGZdl{}\PYGZca{}\PYGZob{}\PYGZhy{}2\PYGZcb{}\PYGZdl{})}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16} \PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Insolation_11_0}.png}
+
+
+\subsection{Past orbital parameters}
+\label{notebooks/Insolation:Past-orbital-parameters}
+The \code{orbital.py} code allows us to look up the orbital parameters for
+Earth over the last 5 million years.
+
+Make reference plots of the variation in the three orbital parameter
+over the last 1 million years
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [6]: }\PYG{n}{kyears} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{1000.}\PYG{p}{,} \PYG{l+m+mf}{1.}\PYG{p}{)}
+        \PYG{n}{table} \PYG{o}{=} \PYG{n}{OrbitalTable}\PYG{p}{(}\PYG{p}{)}
+        \PYG{n}{orb} \PYG{o}{=} \PYG{n}{table}\PYG{o}{.}\PYG{n}{lookup\PYGZus{}parameters}\PYG{p}{(} \PYG{n}{kyears} \PYG{p}{)}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+Loading Berger and Loutre (1991) orbital parameter data from file /home/moritz/anaconda2/envs/climlab_0.3_env/lib/python2.7/site-packages/climlab/solar/orbit91
+\end{OriginalVerbatim}
+The Python object \code{orb} now holds 1 million years worth of orbital
+data, total of 1001 data points for each element: eccentricity \code{ecc},
+obliquity angle \code{obliquity}, and solar longitude of perihelion
+\code{long\_peri}.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [23]: }\PYG{n}{orb}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxout}{Out[23]: }\PYGZob{}\PYGZsq{}ecc\PYGZsq{}: array([ 0.035765,  0.036953,  0.038114, ...,  0.018024,  0.017644,
+                  0.017236]),
+          \PYGZsq{}long\PYGZus{}peri\PYGZsq{}: array([ 122.46,  138.29,  154.17, ...,  247.23,  264.26,  281.37]),
+          \PYGZsq{}obliquity\PYGZsq{}: array([ 23.778,  23.835,  23.877, ...,  23.697,  23.573,  23.446])\PYGZcb{}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [25]: }\PYG{k}{print} \PYG{p}{[}\PYG{n}{np}\PYG{o}{.}\PYG{n}{shape}\PYG{p}{(} \PYG{n}{orb}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{ecc}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]} \PYG{p}{)}\PYG{p}{,}
+                \PYG{n}{np}\PYG{o}{.}\PYG{n}{shape}\PYG{p}{(} \PYG{n}{orb}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{long\PYGZus{}peri}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]} \PYG{p}{)}\PYG{p}{,}
+                \PYG{n}{np}\PYG{o}{.}\PYG{n}{shape}\PYG{p}{(} \PYG{n}{orb}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{obliquity}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]} \PYG{p}{)} \PYG{p}{]}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+[(1001,), (1001,), (1001,)]
+\end{OriginalVerbatim}
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [8]: }\PYG{n}{fig} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(} \PYG{n}{figsize} \PYG{o}{=} \PYG{p}{(}\PYG{l+m+mi}{6}\PYG{p}{,}\PYG{l+m+mi}{6}\PYG{p}{)} \PYG{p}{)}
+        \PYG{n}{ax1} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}
+        \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{kyears}\PYG{p}{,} \PYG{n}{orb}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{ecc}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]} \PYG{p}{)}
+        \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Eccentricity \PYGZdl{}e\PYGZdl{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+        \PYG{n}{ax2} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{)}
+        \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{kyears}\PYG{p}{,} \PYG{n}{orb}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{ecc}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sin}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{deg2rad}\PYG{p}{(} \PYG{n}{orb}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{long\PYGZus{}peri}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]} \PYG{p}{)} \PYG{p}{)} \PYG{p}{)}
+        \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Precessional parameter \PYGZdl{}e }\PYG{l+s+s1}{\PYGZbs{}}\PYG{l+s+s1}{sin(}\PYG{l+s+s1}{\PYGZbs{}}\PYG{l+s+s1}{Lambda)\PYGZdl{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+        \PYG{n}{ax3} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{)}
+        \PYG{n}{ax3}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{kyears}\PYG{p}{,} \PYG{n}{orb}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{obliquity}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]} \PYG{p}{)}
+        \PYG{n}{ax3}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Obliquity (axial tilt) \PYGZdl{}}\PYG{l+s+s1}{\PYGZbs{}}\PYG{l+s+s1}{Phi\PYGZdl{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+        \PYG{n}{ax3}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Thousands of years before present}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{12} \PYG{p}{)}
+        
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{tight\PYGZus{}layout}\PYG{p}{(}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Insolation_19_0}.png}
+
+
+\subsubsection{Annual mean insolation}
+\label{notebooks/Insolation:Annual-mean-insolation}
+Create a large array of insolation over the whole globe, whole year, and
+for every set of orbital parameters.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [9]: }\PYG{n}{lat} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,} \PYG{l+m+mi}{90}\PYG{p}{,} \PYG{l+m+mi}{181}\PYG{p}{)}
+        \PYG{n}{days} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{l+m+mf}{1.}\PYG{p}{,}\PYG{l+m+mf}{50.}\PYG{p}{)}\PYG{o}{/}\PYG{l+m+mi}{50} \PYG{o}{*} \PYG{n}{const}\PYG{o}{.}\PYG{n}{days\PYGZus{}per\PYGZus{}year}
+        \PYG{n}{Q} \PYG{o}{=} \PYG{n}{daily\PYGZus{}insolation}\PYG{p}{(}\PYG{n}{lat}\PYG{p}{,} \PYG{n}{days}\PYG{p}{,} \PYG{n}{orb}\PYG{p}{)}
+        \PYG{k}{print} \PYG{n}{Q}\PYG{o}{.}\PYG{n}{shape}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+(181, 50, 1001)
+\end{OriginalVerbatim}
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [10]: }\PYG{n}{Qann} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(}\PYG{n}{Q}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{)}  \PYG{c+c1}{\PYGZsh{} time average over the year}
+         \PYG{k}{print} \PYG{n}{Qann}\PYG{o}{.}\PYG{n}{shape}
+         \PYG{n}{Qglobal} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{empty\PYGZus{}like}\PYG{p}{(} \PYG{n}{kyears} \PYG{p}{)}
+         \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(} \PYG{n}{kyears}\PYG{o}{.}\PYG{n}{size} \PYG{p}{)}\PYG{p}{:}   \PYG{c+c1}{\PYGZsh{} global area\PYGZhy{}weighted average}
+             \PYG{n}{Qglobal}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(} \PYG{n}{Qann}\PYG{p}{[}\PYG{p}{:}\PYG{p}{,}\PYG{n}{n}\PYG{p}{]} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{cos}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{deg2rad}\PYG{p}{(}\PYG{n}{lat}\PYG{p}{)} \PYG{p}{)} \PYG{p}{)} \PYGZbs{}
+                          \PYG{o}{/} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{cos}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{deg2rad}\PYG{p}{(}\PYG{n}{lat}\PYG{p}{)} \PYG{p}{)} \PYG{p}{)}
+         \PYG{k}{print} \PYG{n}{Qglobal}\PYG{o}{.}\PYG{n}{shape}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+(181, 1001)
+(1001,)
+\end{OriginalVerbatim}
+We are going to create a figure showing past time variations in three
+quantities:
+\begin{enumerate}
+\item {} 
+Global, annual mean insolation
+
+\item {} 
+Annual mean insolation at high northern latitudes
+
+\item {} 
+Summer solstice insolation at high northern latitudes
+
+\end{enumerate}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [32]: }\PYG{n}{fig} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(} \PYG{n}{figsize} \PYG{o}{=} \PYG{p}{(}\PYG{l+m+mi}{7}\PYG{p}{,}\PYG{l+m+mi}{9}\PYG{p}{)} \PYG{p}{,} \PYG{n}{dpi}\PYG{o}{=}\PYG{l+m+mi}{80} \PYG{p}{)}
+         
+         \PYG{n}{ax1} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}
+         \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{kyears}\PYG{p}{,} \PYG{n}{Qglobal} \PYG{p}{)}
+         \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Global, annual mean insolation}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+         \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{ticklabel\PYGZus{}format}\PYG{p}{(} \PYG{n}{useOffset}\PYG{o}{=}\PYG{n+nb+bp}{False} \PYG{p}{)}
+         
+         \PYG{n}{ax2} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{)}
+         \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{kyears}\PYG{p}{,} \PYG{n}{Qann}\PYG{p}{[}\PYG{l+m+mi}{160}\PYG{p}{,}\PYG{p}{:}\PYG{p}{]} \PYG{p}{)}
+         \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Annual mean insolation at 70N}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+         
+         \PYG{n}{ax3} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{)}
+         \PYG{n}{ax3}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{kyears}\PYG{p}{,} \PYG{n}{Q}\PYG{p}{[}\PYG{l+m+mi}{160}\PYG{p}{,}\PYG{l+m+mi}{23}\PYG{p}{,}\PYG{p}{:}\PYG{p}{]} \PYG{p}{)}
+         \PYG{n}{ax3}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Thousands of years before present}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{12} \PYG{p}{)}
+         \PYG{n}{ax3}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Summer solstice insolation at 70N}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+         
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{tight\PYGZus{}layout}\PYG{p}{(}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Insolation_25_0}.png}
+
+And comparing with the plots of orbital variations above, we see that
+\begin{enumerate}
+\item {} 
+Global annual mean insolation variations on with eccentricity (slow),
+and the variations are very small!
+
+\item {} 
+Annual mean insolation varies with obliquity (medium). Annual mean
+insolation does NOT depend on precession!
+
+\item {} 
+Summer solstice insolation at high northern latitudes is affected by
+both precession and obliquity. The variations are large.
+
+\end{enumerate}
+
+
+\subsubsection{Insolation changes between the Last Glacial Maximum and the end of the last ice age}
+\label{notebooks/Insolation:Insolation-changes-between-the-Last-Glacial-Maximum-and-the-end-of-the-last-ice-age}
+Last Glacial Maximum or ``LGM'' occurred around 23,000 years before
+present, when the ice sheets were at their greatest extent. By 10,000
+years ago, the ice sheets were mostly gone and the last ice age was
+over. Let's plot the changes in the seasonal distribution of insolation
+from 23 kyrs to 10 kyrs.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [12]: }\PYG{c+c1}{\PYGZsh{} present\PYGZhy{}day orbital parameters}
+         \PYG{n}{orb\PYGZus{}0} \PYG{o}{=} \PYG{n}{table}\PYG{o}{.}\PYG{n}{lookup\PYGZus{}parameters}\PYG{p}{(} \PYG{l+m+mi}{0} \PYG{p}{)}
+         
+         \PYG{c+c1}{\PYGZsh{} orbital parameters for 10 kyrs before present}
+         \PYG{n}{orb\PYGZus{}10} \PYG{o}{=} \PYG{n}{table}\PYG{o}{.}\PYG{n}{lookup\PYGZus{}parameters}\PYG{p}{(} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{10} \PYG{p}{)}
+         
+         \PYG{c+c1}{\PYGZsh{} 23 kyrs before present}
+         \PYG{n}{orb\PYGZus{}23} \PYG{o}{=} \PYG{n}{table}\PYG{o}{.}\PYG{n}{lookup\PYGZus{}parameters}\PYG{p}{(} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{23} \PYG{p}{)}
+         
+         \PYG{c+c1}{\PYGZsh{} insolation arrays for each of the three sets of orbital parameters}
+         \PYG{n}{Q\PYGZus{}0} \PYG{o}{=} \PYG{n}{daily\PYGZus{}insolation}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{days}\PYG{p}{,} \PYG{n}{orb\PYGZus{}0} \PYG{p}{)}
+         \PYG{n}{Q\PYGZus{}10} \PYG{o}{=} \PYG{n}{daily\PYGZus{}insolation}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{days}\PYG{p}{,} \PYG{n}{orb\PYGZus{}10} \PYG{p}{)}
+         \PYG{n}{Q\PYGZus{}23} \PYG{o}{=} \PYG{n}{daily\PYGZus{}insolation}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{days}\PYG{p}{,} \PYG{n}{orb\PYGZus{}23} \PYG{p}{)}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [13]: }\PYG{n}{fig} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(} \PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{20}\PYG{p}{,}\PYG{l+m+mi}{8}\PYG{p}{)} \PYG{p}{)}
+         
+         \PYG{n}{ax1} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}
+         \PYG{n}{Qdiff} \PYG{o}{=} \PYG{n}{Q\PYGZus{}10} \PYG{o}{\PYGZhy{}} \PYG{n}{Q\PYGZus{}23}
+         \PYG{n}{CS1} \PYG{o}{=} \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{contour}\PYG{p}{(} \PYG{n}{days}\PYG{p}{,} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{Qdiff}\PYG{p}{,} \PYG{n}{levels} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{100.}\PYG{p}{,} \PYG{l+m+mf}{100.}\PYG{p}{,} \PYG{l+m+mf}{10.}\PYG{p}{)} \PYG{p}{)}
+         \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{clabel}\PYG{p}{(}\PYG{n}{CS1}\PYG{p}{,} \PYG{n}{CS1}\PYG{o}{.}\PYG{n}{levels}\PYG{p}{,} \PYG{n}{inline}\PYG{o}{=}\PYG{n+nb+bp}{True}\PYG{p}{,} \PYG{n}{fmt}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+si}{\PYGZpc{}r}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{10}\PYG{p}{)}
+         \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{contour}\PYG{p}{(} \PYG{n}{days}\PYG{p}{,} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{Qdiff}\PYG{p}{,} \PYG{n}{levels} \PYG{o}{=} \PYG{p}{[}\PYG{l+m+mf}{0.}\PYG{p}{]}\PYG{p}{,} \PYG{n}{color} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{k}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Days since January 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16} \PYG{p}{)}
+         \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16} \PYG{p}{)}
+         \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Insolation differences: 10 kyrs \PYGZhy{} 23 kyrs}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{24} \PYG{p}{)}
+         
+         \PYG{n}{ax2} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{)}
+         \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(} \PYG{n}{Qdiff}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{1} \PYG{p}{)}\PYG{p}{,} \PYG{n}{lat} \PYG{p}{)}
+         \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{W m\PYGZdl{}\PYGZca{}\PYGZob{}\PYGZhy{}2\PYGZcb{}\PYGZdl{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16} \PYG{p}{)}
+         \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16} \PYG{p}{)}
+         \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{ Annual mean differences}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{24} \PYG{p}{)}
+         \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylim}\PYG{p}{(}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,}\PYG{l+m+mi}{90}\PYG{p}{)}\PYG{p}{)}
+         \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{p}{)}
+         
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Insolation_30_0}.png}
+
+The annual mean plot shows a classic obliquity signal: at 10 kyrs, the
+axis close to its maximum tilt, around 24.2º. At 23 kyrs, the tilt was
+much weaker, only about 22.7º. In the annual mean, a stronger tilt means
+more sunlight to the poles and less to the equator. This is very helpful
+if you are trying to melt an ice sheet.
+
+Finally, take the global average of the difference:
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [14]: }\PYG{k}{print} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(}\PYG{n}{Qdiff}\PYG{p}{,}\PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{)} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{cos}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{deg2rad}\PYG{p}{(}\PYG{n}{lat}\PYG{p}{)} \PYG{p}{)} \PYG{p}{)} \PYGZbs{}
+               \PYG{o}{/} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{cos}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{deg2rad}\PYG{p}{(}\PYG{n}{lat}\PYG{p}{)}\PYG{p}{)} \PYG{p}{)}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+0.00651043078327
+\end{OriginalVerbatim}
+This confirms that the difference is tiny (and due to very small changes
+in the eccentricity). \textbf{Ice ages are driven by seasonal and latitudinal
+redistributions of solar energy}, NOT by changes in the total global
+amount of solar energy!
+
+
+\section{The seasonal cycle of surface temperature}
+\label{notebooks/Seasonal_cycle_and_heat_capacity:The-seasonal-cycle-of-surface-temperature}\label{notebooks/Seasonal_cycle_and_heat_capacity::doc}
+Look at the observed seasonal cycle in the NCEP reanalysis data.
+
+Read in the necessary data from the online server.
+
+The catalog is here:
+\href{http://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/ncep.reanalysis.derived/catalog.html}{http://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/ncep.reanalysis.derived/catalog.html}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [1]: }\PYG{o}{\PYGZpc{}}\PYG{k}{matplotlib} inline
+        \PYG{k+kn}{import} \PYG{n+nn}{numpy} \PYG{k+kn}{as} \PYG{n+nn}{np}
+        \PYG{k+kn}{import} \PYG{n+nn}{matplotlib.pyplot} \PYG{k+kn}{as} \PYG{n+nn}{plt}
+        \PYG{k+kn}{import} \PYG{n+nn}{netCDF4} \PYG{k+kn}{as} \PYG{n+nn}{nc}
+        \PYG{k+kn}{from} \PYG{n+nn}{climlab} \PYG{k+kn}{import} \PYG{n}{constants} \PYG{k}{as} \PYG{n}{const}
+        \PYG{k+kn}{from} \PYG{n+nn}{climlab.model} \PYG{k+kn}{import} \PYG{n}{ebm}
+        \PYG{k+kn}{from} \PYG{n+nn}{climlab.solar.insolation} \PYG{k+kn}{import} \PYG{n}{daily\PYGZus{}insolation}
+        
+        \PYG{n}{datapath} \PYG{o}{=} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{http://ramadda.atmos.albany.edu:8080/repository/opendap/latest/Top/Users/Brian+Rose/CESM+runs/}\PYG{l+s+s2}{\PYGZdq{}}
+        \PYG{n}{endstr} \PYG{o}{=} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{/entry.das}\PYG{l+s+s2}{\PYGZdq{}}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [2]: }\PYG{n}{ncep\PYGZus{}url} \PYG{o}{=} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{http://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/ncep.reanalysis.derived/}\PYG{l+s+s2}{\PYGZdq{}}
+        \PYG{n}{ncep\PYGZus{}air} \PYG{o}{=} \PYG{n}{nc}\PYG{o}{.}\PYG{n}{Dataset}\PYG{p}{(} \PYG{n}{ncep\PYGZus{}url} \PYG{o}{+} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{pressure/air.mon.1981\PYGZhy{}2010.ltm.nc}\PYG{l+s+s2}{\PYGZdq{}} \PYG{p}{)}
+        \PYG{n}{ncep\PYGZus{}Ts} \PYG{o}{=} \PYG{n}{nc}\PYG{o}{.}\PYG{n}{Dataset}\PYG{p}{(} \PYG{n}{ncep\PYGZus{}url} \PYG{o}{+} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{surface\PYGZus{}gauss/skt.sfc.mon.1981\PYGZhy{}2010.ltm.nc}\PYG{l+s+s2}{\PYGZdq{}} \PYG{p}{)}
+        \PYG{n}{lat\PYGZus{}ncep} \PYG{o}{=} \PYG{n}{ncep\PYGZus{}Ts}\PYG{o}{.}\PYG{n}{variables}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{lat}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{[}\PYG{p}{:}\PYG{p}{]}\PYG{p}{;} \PYG{n}{lon\PYGZus{}ncep} \PYG{o}{=} \PYG{n}{ncep\PYGZus{}Ts}\PYG{o}{.}\PYG{n}{variables}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{lon}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{[}\PYG{p}{:}\PYG{p}{]}
+        \PYG{n}{Ts\PYGZus{}ncep} \PYG{o}{=} \PYG{n}{ncep\PYGZus{}Ts}\PYG{o}{.}\PYG{n}{variables}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{skt}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{[}\PYG{p}{:}\PYG{p}{]}
+        \PYG{k}{print} \PYG{n}{Ts\PYGZus{}ncep}\PYG{o}{.}\PYG{n}{shape}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+(12, 94, 192)
+\end{OriginalVerbatim}
+Load the topography file from CESM, just so we can plot the continents.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [3]: }\PYG{n}{topo} \PYG{o}{=} \PYG{n}{nc}\PYG{o}{.}\PYG{n}{Dataset}\PYG{p}{(} \PYG{n}{datapath} \PYG{o}{+} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{som\PYGZus{}input/USGS\PYGZhy{}gtopo30\PYGZus{}1.9x2.5\PYGZus{}remap\PYGZus{}c050602.nc}\PYG{l+s+s1}{\PYGZsq{}} \PYG{o}{+} \PYG{n}{endstr} \PYG{p}{)}
+        \PYG{n}{lat\PYGZus{}cesm} \PYG{o}{=} \PYG{n}{topo}\PYG{o}{.}\PYG{n}{variables}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{lat}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{[}\PYG{p}{:}\PYG{p}{]}
+        \PYG{n}{lon\PYGZus{}cesm} \PYG{o}{=} \PYG{n}{topo}\PYG{o}{.}\PYG{n}{variables}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{lon}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{[}\PYG{p}{:}\PYG{p}{]}
+\end{OriginalVerbatim}
+
+Make two maps: one of annual mean surface temperature, another of the
+seasonal range (max minus min).
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [4]: }\PYG{n}{maxTs} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{Ts\PYGZus{}ncep}\PYG{p}{,}\PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+        \PYG{n}{minTs} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{min}\PYG{p}{(}\PYG{n}{Ts\PYGZus{}ncep}\PYG{p}{,}\PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [5]: }\PYG{n}{fig} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(} \PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{16}\PYG{p}{,}\PYG{l+m+mi}{6}\PYG{p}{)} \PYG{p}{)}
+        
+        \PYG{n}{ax1} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}
+        \PYG{n}{cax1} \PYG{o}{=} \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{pcolormesh}\PYG{p}{(} \PYG{n}{lon\PYGZus{}ncep}\PYG{p}{,} \PYG{n}{lat\PYGZus{}ncep}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(}\PYG{n}{Ts\PYGZus{}ncep}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}\PYG{p}{,} \PYG{n}{cmap}\PYG{o}{=}\PYG{n}{plt}\PYG{o}{.}\PYG{n}{cm}\PYG{o}{.}\PYG{n}{seismic} \PYG{p}{)}
+        \PYG{n}{cbar1} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{colorbar}\PYG{p}{(}\PYG{n}{cax1}\PYG{p}{)}
+        \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Annual mean surface temperature (degC)}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+        
+        \PYG{n}{ax2} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{)}
+        \PYG{n}{cax2} \PYG{o}{=} \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{pcolormesh}\PYG{p}{(} \PYG{n}{lon\PYGZus{}ncep}\PYG{p}{,} \PYG{n}{lat\PYGZus{}ncep}\PYG{p}{,} \PYG{n}{maxTs} \PYG{o}{\PYGZhy{}} \PYG{n}{minTs} \PYG{p}{)}
+        \PYG{n}{cbar2} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{colorbar}\PYG{p}{(}\PYG{n}{cax2}\PYG{p}{)}
+        \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Seasonal temperature range (degC)}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14}\PYG{p}{)}
+        
+        \PYG{k}{for} \PYG{n}{ax} \PYG{o+ow}{in} \PYG{p}{[}\PYG{n}{ax1}\PYG{p}{,}\PYG{n}{ax2}\PYG{p}{]}\PYG{p}{:}
+            \PYG{n}{ax}\PYG{o}{.}\PYG{n}{contour}\PYG{p}{(} \PYG{n}{lon\PYGZus{}cesm}\PYG{p}{,} \PYG{n}{lat\PYGZus{}cesm}\PYG{p}{,} \PYG{n}{topo}\PYG{o}{.}\PYG{n}{variables}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{LANDFRAC}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{[}\PYG{p}{:}\PYG{p}{]}\PYG{p}{,} \PYG{n}{levels}\PYG{o}{=}\PYG{p}{[}\PYG{l+m+mf}{0.5}\PYG{p}{]}\PYG{p}{,} \PYG{n}{colors}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{k}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}\PYG{p}{;}
+            \PYG{n}{ax}\PYG{o}{.}\PYG{n}{axis}\PYG{p}{(}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{360}\PYG{p}{,} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,} \PYG{l+m+mi}{90}\PYG{p}{]}\PYG{p}{)}
+            \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Longitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}\PYG{p}{;} \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Seasonal_cycle_and_heat_capacity_8_0}.png}
+
+Make a contour plot of the zonal mean temperature as a function of time
+of year
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [6]: }\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{65}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{55}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{45}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{35}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{25}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{15}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{5}\PYG{p}{,}\PYG{l+m+mi}{5}\PYG{p}{,}\PYG{l+m+mi}{15}\PYG{p}{,}\PYG{l+m+mi}{25}\PYG{p}{,}\PYG{l+m+mi}{35}\PYG{p}{,}\PYG{l+m+mi}{45}\PYG{p}{,}\PYG{l+m+mi}{55}\PYG{p}{,}\PYG{l+m+mi}{65}\PYG{p}{]}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxout}{Out[6]: }[\PYGZhy{}65, \PYGZhy{}55, \PYGZhy{}45, \PYGZhy{}35, \PYGZhy{}25, \PYGZhy{}15, \PYGZhy{}5, 5, 15, 25, 35, 45, 55, 65]
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [7]: }\PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{65}\PYG{p}{,}\PYG{l+m+mi}{75}\PYG{p}{,}\PYG{l+m+mi}{10}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxout}{Out[7]: }array([\PYGZhy{}65, \PYGZhy{}55, \PYGZhy{}45, \PYGZhy{}35, \PYGZhy{}25, \PYGZhy{}15,  \PYGZhy{}5,   5,  15,  25,  35,  45,  55,  65])
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [8]: }\PYG{n}{Tmax} \PYG{o}{=} \PYG{l+m+mi}{65}\PYG{p}{;} \PYG{n}{Tmin} \PYG{o}{=} \PYG{o}{\PYGZhy{}}\PYG{n}{Tmax}\PYG{p}{;} \PYG{n}{delT} \PYG{o}{=} \PYG{l+m+mi}{10}
+        \PYG{n}{clevels} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{n}{Tmin}\PYG{p}{,}\PYG{n}{Tmax}\PYG{o}{+}\PYG{n}{delT}\PYG{p}{,}\PYG{n}{delT}\PYG{p}{)}
+        
+        \PYG{n}{fig\PYGZus{}zonobs} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(} \PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{10}\PYG{p}{,}\PYG{l+m+mi}{6}\PYG{p}{)} \PYG{p}{)}
+        \PYG{n}{ax} \PYG{o}{=} \PYG{n}{fig\PYGZus{}zonobs}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{111}\PYG{p}{)}
+        \PYG{n}{cax} \PYG{o}{=} \PYG{n}{ax}\PYG{o}{.}\PYG{n}{contourf}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{l+m+mi}{12}\PYG{p}{)}\PYG{o}{+}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{n}{lat\PYGZus{}ncep}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{transpose}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(} \PYG{n}{Ts\PYGZus{}ncep}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{2} \PYG{p}{)}\PYG{p}{)}\PYG{p}{,} \PYG{n}{levels}\PYG{o}{=}\PYG{n}{clevels}\PYG{p}{,}
+                       \PYG{n}{cmap}\PYG{o}{=}\PYG{n}{plt}\PYG{o}{.}\PYG{n}{cm}\PYG{o}{.}\PYG{n}{seismic}\PYG{p}{,} \PYG{n}{vmin}\PYG{o}{=}\PYG{n}{Tmin}\PYG{p}{,} \PYG{n}{vmax}\PYG{o}{=}\PYG{n}{Tmax} \PYG{p}{)}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Month}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16}\PYG{p}{)}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16} \PYG{p}{)}
+        \PYG{n}{cbar} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{colorbar}\PYG{p}{(}\PYG{n}{cax}\PYG{p}{)}
+        \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Zonal mean surface temperature (degC)}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{20}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Seasonal_cycle_and_heat_capacity_12_0}.png}
+
+
+\subsection{Exploring the amplitude of the seasonal cycle with an EBM}
+\label{notebooks/Seasonal_cycle_and_heat_capacity:Exploring-the-amplitude-of-the-seasonal-cycle-with-an-EBM}
+We are looking at the 1D (zonally averaged) energy balance model with
+diffusive heat transport. The equation is
+
+\(C \frac{\partial T(\phi,t)}{\partial t} = \big(1-\alpha\big) Q(\phi,t) - \Big(A+B T(\phi,t) \Big) +  \frac{K}{\cos\phi} \frac{\partial}{\partial \phi} \bigg( \cos\phi \frac{\partial T}{\partial \phi} \bigg)\)
+
+and the code in \code{climlab.model.ebm.py} solves this equation
+numerically.
+
+One handy feature of \code{climlab} process code: the function
+\code{integrate\_years()} automatically calculates the time averaged
+temperature. So if we run it for exactly one year, we get the annual
+mean temperature saved in the field \code{T\_timeave}.
+
+We will look at the seasonal cycle of temperature in three different
+models with different heat capacities (which we express through an
+equivalent depth of water in meters):
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [9]: }\PYG{n}{model1} \PYG{o}{=} \PYG{n}{ebm}\PYG{o}{.}\PYG{n}{EBM\PYGZus{}seasonal}\PYG{p}{(}\PYG{p}{)}
+        \PYG{n}{model1}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{verbose}\PYG{o}{=}\PYG{n+nb+bp}{True}\PYG{p}{)}
+        
+        \PYG{n}{water\PYGZus{}depths} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{l+m+mf}{2.}\PYG{p}{,} \PYG{l+m+mf}{10.}\PYG{p}{,} \PYG{l+m+mf}{50.}\PYG{p}{]}\PYG{p}{)}
+        
+        \PYG{n}{num\PYGZus{}depths} \PYG{o}{=} \PYG{n}{water\PYGZus{}depths}\PYG{o}{.}\PYG{n}{size}
+        \PYG{n}{Tann} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{empty}\PYG{p}{(} \PYG{p}{[}\PYG{n}{model1}\PYG{o}{.}\PYG{n}{lat}\PYG{o}{.}\PYG{n}{size}\PYG{p}{,} \PYG{n}{num\PYGZus{}depths}\PYG{p}{]} \PYG{p}{)}
+        \PYG{n}{models} \PYG{o}{=} \PYG{p}{[}\PYG{p}{]}
+        
+        \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{num\PYGZus{}depths}\PYG{p}{)}\PYG{p}{:}
+            \PYG{n}{models}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{ebm}\PYG{o}{.}\PYG{n}{EBM\PYGZus{}seasonal}\PYG{p}{(}\PYG{n}{water\PYGZus{}depth}\PYG{o}{=}\PYG{n}{water\PYGZus{}depths}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{p}{)}\PYG{p}{)}
+            \PYG{n}{models}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mf}{20.}\PYG{p}{,} \PYG{n}{verbose}\PYG{o}{=}\PYG{n+nb+bp}{False} \PYG{p}{)}
+            \PYG{n}{models}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mf}{1.}\PYG{p}{,} \PYG{n}{verbose}\PYG{o}{=}\PYG{n+nb+bp}{False}\PYG{p}{)}
+            \PYG{n}{Tann}\PYG{p}{[}\PYG{p}{:}\PYG{p}{,}\PYG{n}{n}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{squeeze}\PYG{p}{(}\PYG{n}{models}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{o}{.}\PYG{n}{timeave}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Ts}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+Integrating for 90 steps, 365.2422 days, or 1 years.
+Total elapsed time is 1.0 years.
+\end{OriginalVerbatim}
+All models should have the same annual mean temperature:
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [10]: }\PYG{n}{lat} \PYG{o}{=} \PYG{n}{model1}\PYG{o}{.}\PYG{n}{lat}
+         
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{lat}\PYG{p}{,} \PYG{n}{Tann}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,}\PYG{l+m+mi}{90}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Temperature (degC)}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Annual mean temperature in the EBM}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{(} \PYG{n}{water\PYGZus{}depths}\PYG{o}{.}\PYG{n}{astype}\PYG{p}{(}\PYG{n+nb}{str}\PYG{p}{)} \PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Seasonal_cycle_and_heat_capacity_21_0}.png}
+
+There is no automatic function in the \code{ebm.py} code to keep track of
+minimum and maximum temperatures (though we might add that in the
+future!)
+
+Instead we'll step through one year ``by hand'' and save all the
+temperatures.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [11]: }\PYG{n}{num\PYGZus{}steps\PYGZus{}per\PYGZus{}year} \PYG{o}{=} \PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{model1}\PYG{o}{.}\PYG{n}{time}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{num\PYGZus{}steps\PYGZus{}per\PYGZus{}year}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+         \PYG{n}{Tyear} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{empty}\PYG{p}{(}\PYG{p}{(}\PYG{n}{lat}\PYG{o}{.}\PYG{n}{size}\PYG{p}{,} \PYG{n}{num\PYGZus{}steps\PYGZus{}per\PYGZus{}year}\PYG{p}{,} \PYG{n}{num\PYGZus{}depths}\PYG{p}{)}\PYG{p}{)}
+         \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{num\PYGZus{}depths}\PYG{p}{)}\PYG{p}{:}
+             \PYG{k}{for} \PYG{n}{m} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{num\PYGZus{}steps\PYGZus{}per\PYGZus{}year}\PYG{p}{)}\PYG{p}{:}
+                 \PYG{n}{models}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{o}{.}\PYG{n}{step\PYGZus{}forward}\PYG{p}{(}\PYG{p}{)}
+                 \PYG{n}{Tyear}\PYG{p}{[}\PYG{p}{:}\PYG{p}{,}\PYG{n}{m}\PYG{p}{,}\PYG{n}{n}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{squeeze}\PYG{p}{(}\PYG{n}{models}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{o}{.}\PYG{n}{state}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Ts}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+Make a figure to compare the observed zonal mean seasonal temperature
+cycle to what we get from the EBM with different heat capacities:
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [12]: }\PYG{n}{fig} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(} \PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{20}\PYG{p}{,}\PYG{l+m+mi}{10}\PYG{p}{)} \PYG{p}{)}
+         
+         \PYG{n}{ax} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{n}{num\PYGZus{}depths}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{)}
+         \PYG{n}{cax} \PYG{o}{=} \PYG{n}{ax}\PYG{o}{.}\PYG{n}{contourf}\PYG{p}{(} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{l+m+mi}{12}\PYG{p}{)}\PYG{o}{+}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{n}{lat\PYGZus{}ncep}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{transpose}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(} \PYG{n}{Ts\PYGZus{}ncep}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{2} \PYG{p}{)}\PYG{p}{)}\PYG{p}{,} \PYG{n}{levels}\PYG{o}{=}\PYG{n}{clevels}\PYG{p}{,}
+                        \PYG{n}{cmap}\PYG{o}{=}\PYG{n}{plt}\PYG{o}{.}\PYG{n}{cm}\PYG{o}{.}\PYG{n}{seismic}\PYG{p}{,} \PYG{n}{vmin}\PYG{o}{=}\PYG{n}{Tmin}\PYG{p}{,} \PYG{n}{vmax}\PYG{o}{=}\PYG{n}{Tmax} \PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Month}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+         \PYG{n}{cbar} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{colorbar}\PYG{p}{(}\PYG{n}{cax}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Zonal mean surface temperature \PYGZhy{} observed (degC)}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{20}\PYG{p}{)}
+         
+         \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{num\PYGZus{}depths}\PYG{p}{)}\PYG{p}{:}
+             \PYG{n}{ax} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{n}{num\PYGZus{}depths}\PYG{p}{,}\PYG{n}{num\PYGZus{}depths}\PYG{o}{+}\PYG{n}{n}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{)}
+             \PYG{n}{cax} \PYG{o}{=} \PYG{n}{ax}\PYG{o}{.}\PYG{n}{contourf}\PYG{p}{(} \PYG{l+m+mi}{4}\PYG{o}{*}\PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{n}{num\PYGZus{}steps\PYGZus{}per\PYGZus{}year}\PYG{p}{)}\PYG{p}{,} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{Tyear}\PYG{p}{[}\PYG{p}{:}\PYG{p}{,}\PYG{p}{:}\PYG{p}{,}\PYG{n}{n}\PYG{p}{]}\PYG{p}{,} \PYG{n}{levels}\PYG{o}{=}\PYG{n}{clevels}\PYG{p}{,}
+                        \PYG{n}{cmap}\PYG{o}{=}\PYG{n}{plt}\PYG{o}{.}\PYG{n}{cm}\PYG{o}{.}\PYG{n}{seismic}\PYG{p}{,} \PYG{n}{vmin}\PYG{o}{=}\PYG{n}{Tmin}\PYG{p}{,} \PYG{n}{vmax}\PYG{o}{=}\PYG{n}{Tmax} \PYG{p}{)}
+             \PYG{n}{cbar1} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{colorbar}\PYG{p}{(}\PYG{n}{cax}\PYG{p}{)}
+             \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{water\PYGZus{}depth = }\PYG{l+s+s1}{\PYGZsq{}} \PYG{o}{+} \PYG{n+nb}{str}\PYG{p}{(}\PYG{n}{models}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{o}{.}\PYG{n}{param}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{water\PYGZus{}depth}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)} \PYG{o}{+} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{ meters}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{20} \PYG{p}{)}
+             \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Days of year}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+             \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+         
+         \PYG{c+c1}{\PYGZsh{}fig.set\PYGZus{}title(\PYGZsq{}Temperature in seasonal EBM with various water depths\PYGZsq{}, fontsize=14)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Seasonal_cycle_and_heat_capacity_25_0}.png}
+
+Which one looks more realistic? Depends a bit on where you look. But
+overall, the observed seasonal cycle matches the 10 meter case best. The
+effective heat capacity governing the seasonal cycle of the zonal mean
+temperature is closer to 10 meters of water than to either 2 or 50
+meters.
+
+
+\subsubsection{Making an animation of the EBM solutions}
+\label{notebooks/Seasonal_cycle_and_heat_capacity:Making-an-animation-of-the-EBM-solutions}
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [13]: }\PYG{n}{fpath} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{/Users/Brian/Dropbox/PythonStuff/ebm\PYGZus{}seasonal\PYGZus{}frames/}\PYG{l+s+s1}{\PYGZsq{}}
+         
+         \PYG{n}{fig} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(} \PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{20}\PYG{p}{,}\PYG{l+m+mi}{5}\PYG{p}{)} \PYG{p}{)}
+         \PYG{c+c1}{\PYGZsh{}for m in range(model2.time[\PYGZsq{}num\PYGZus{}steps\PYGZus{}per\PYGZus{}year\PYGZsq{}]):}
+         \PYG{k}{for} \PYG{n}{m} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{p}{:}
+             \PYG{n}{thisday} \PYG{o}{=} \PYG{n}{m} \PYG{o}{*} \PYG{n}{models}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{param}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{timestep}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]} \PYG{o}{/} \PYG{n}{const}\PYG{o}{.}\PYG{n}{seconds\PYGZus{}per\PYGZus{}day}
+             \PYG{n}{Q} \PYG{o}{=} \PYG{n}{daily\PYGZus{}insolation}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{thisday} \PYG{p}{)}
+             \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{num\PYGZus{}depths}\PYG{p}{)}\PYG{p}{:}
+                 \PYG{n}{c1} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{b}\PYG{l+s+s1}{\PYGZsq{}}
+                 \PYG{n}{ax} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{n}{num\PYGZus{}depths}\PYG{p}{,}\PYG{n}{n}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{)}
+                 \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{Tyear}\PYG{p}{[}\PYG{p}{:}\PYG{p}{,}\PYG{n}{m}\PYG{p}{,}\PYG{n}{n}\PYG{p}{]}\PYG{p}{,} \PYG{n}{c1} \PYG{p}{)}
+                 \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{water\PYGZus{}depth = }\PYG{l+s+s1}{\PYGZsq{}} \PYG{o}{+} \PYG{n+nb}{str}\PYG{p}{(}\PYG{n}{models}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{o}{.}\PYG{n}{param}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{water\PYGZus{}depth}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)} \PYG{o}{+} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{ meters}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{20} \PYG{p}{)}
+                 \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+                 \PYG{k}{if} \PYG{n}{n} \PYG{o+ow}{is} \PYG{l+m+mi}{0}\PYG{p}{:}
+                     \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Temperature}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{n}{c1} \PYG{p}{)}
+                 \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlim}\PYG{p}{(}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,}\PYG{l+m+mi}{90}\PYG{p}{]}\PYG{p}{)}
+                 \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylim}\PYG{p}{(}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{60}\PYG{p}{,}\PYG{l+m+mi}{60}\PYG{p}{]}\PYG{p}{)}
+                 \PYG{k}{for} \PYG{n}{tl} \PYG{o+ow}{in} \PYG{n}{ax}\PYG{o}{.}\PYG{n}{get\PYGZus{}yticklabels}\PYG{p}{(}\PYG{p}{)}\PYG{p}{:}
+                     \PYG{n}{tl}\PYG{o}{.}\PYG{n}{set\PYGZus{}color}\PYG{p}{(}\PYG{n}{c1}\PYG{p}{)}
+                 \PYG{n}{ax}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{p}{)}
+         
+                 \PYG{n}{c2} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{r}\PYG{l+s+s1}{\PYGZsq{}}
+                 \PYG{n}{ax2} \PYG{o}{=} \PYG{n}{ax}\PYG{o}{.}\PYG{n}{twinx}\PYG{p}{(}\PYG{p}{)}
+                 \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{Q}\PYG{p}{,} \PYG{n}{c2}\PYG{p}{)}
+                 \PYG{k}{if} \PYG{n}{n} \PYG{o+ow}{is} \PYG{l+m+mi}{2}\PYG{p}{:}
+                     \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Insolation (W m\PYGZdl{}\PYGZca{}\PYGZob{}\PYGZhy{}2\PYGZcb{}\PYGZdl{})}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{n}{c2}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14}\PYG{p}{)}
+                 \PYG{k}{for} \PYG{n}{tl} \PYG{o+ow}{in} \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{get\PYGZus{}yticklabels}\PYG{p}{(}\PYG{p}{)}\PYG{p}{:}
+                     \PYG{n}{tl}\PYG{o}{.}\PYG{n}{set\PYGZus{}color}\PYG{p}{(}\PYG{n}{c2}\PYG{p}{)}
+                 \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlim}\PYG{p}{(}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,}\PYG{l+m+mi}{90}\PYG{p}{]}\PYG{p}{)}
+                 \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylim}\PYG{p}{(}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{600}\PYG{p}{]}\PYG{p}{)}
+         
+             \PYG{n}{filename} \PYG{o}{=} \PYG{n}{fpath} \PYG{o}{+} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{ebm\PYGZus{}seasonal}\PYG{l+s+s1}{\PYGZsq{}} \PYG{o}{+} \PYG{n+nb}{str}\PYG{p}{(}\PYG{n}{m}\PYG{p}{)}\PYG{o}{.}\PYG{n}{zfill}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{)} \PYG{o}{+} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{.png}\PYG{l+s+s1}{\PYGZsq{}}
+             \PYG{c+c1}{\PYGZsh{}fig.savefig(filename)}
+             \PYG{c+c1}{\PYGZsh{}fig.clear()}
+             \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Seasonal_cycle_and_heat_capacity_28_0}.png}
+
+
+\subsection{The seasonal cycle for a planet with 90º obliquity}
+\label{notebooks/Seasonal_cycle_and_heat_capacity:The-seasonal-cycle-for-a-planet-with-90_xba-obliquity}
+The EBM code uses our familiar \code{insolation.py} code to calculate
+insolation, and therefore it's easy to set up a model with different
+orbital parameters. Here is an example with \textbf{very} different orbital
+parameters: 90º obliquity. We looked at the distribution of insolation
+by latitude and season for this type of planet in the last homework.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [14]: }\PYG{n}{orb\PYGZus{}highobl} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{ecc}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{:}\PYG{l+m+mf}{0.}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{obliquity}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{:}\PYG{l+m+mf}{90.}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{long\PYGZus{}peri}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{:}\PYG{l+m+mf}{0.}\PYG{p}{\PYGZcb{}}
+         \PYG{k}{print} \PYG{n}{orb\PYGZus{}highobl}
+         \PYG{n}{model\PYGZus{}highobl} \PYG{o}{=} \PYG{n}{ebm}\PYG{o}{.}\PYG{n}{EBM\PYGZus{}seasonal}\PYG{p}{(}\PYG{n}{orb}\PYG{o}{=}\PYG{n}{orb\PYGZus{}highobl}\PYG{p}{)}
+         \PYG{k}{print} \PYG{n}{model\PYGZus{}highobl}\PYG{o}{.}\PYG{n}{param}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{orb}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+{'long_peri': 0.0, 'ecc': 0.0, 'obliquity': 90.0}
+{'long_peri': 0.0, 'ecc': 0.0, 'obliquity': 90.0}
+\end{OriginalVerbatim}
+Repeat the same procedure to calculate and store temperature throughout
+one year, after letting the models run out to equilibrium.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [15]: }\PYG{n}{Tann\PYGZus{}highobl} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{empty}\PYG{p}{(} \PYG{p}{[}\PYG{n}{lat}\PYG{o}{.}\PYG{n}{size}\PYG{p}{,} \PYG{n}{num\PYGZus{}depths}\PYG{p}{]} \PYG{p}{)}
+         \PYG{n}{models\PYGZus{}highobl} \PYG{o}{=} \PYG{p}{[}\PYG{p}{]}
+         
+         \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{num\PYGZus{}depths}\PYG{p}{)}\PYG{p}{:}
+             \PYG{n}{models\PYGZus{}highobl}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{ebm}\PYG{o}{.}\PYG{n}{EBM\PYGZus{}seasonal}\PYG{p}{(}\PYG{n}{water\PYGZus{}depth}\PYG{o}{=}\PYG{n}{water\PYGZus{}depths}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{p}{,} \PYG{n}{orb}\PYG{o}{=}\PYG{n}{orb\PYGZus{}highobl}\PYG{p}{)}\PYG{p}{)}
+             \PYG{n}{models\PYGZus{}highobl}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mf}{40.}\PYG{p}{,} \PYG{n}{verbose}\PYG{o}{=}\PYG{n+nb+bp}{False} \PYG{p}{)}
+             \PYG{n}{models\PYGZus{}highobl}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mf}{1.}\PYG{p}{)}
+             \PYG{n}{Tann\PYGZus{}highobl}\PYG{p}{[}\PYG{p}{:}\PYG{p}{,}\PYG{n}{n}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{squeeze}\PYG{p}{(}\PYG{n}{models\PYGZus{}highobl}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{o}{.}\PYG{n}{timeave}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Ts}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+         
+         \PYG{n}{Tyear\PYGZus{}highobl} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{empty}\PYG{p}{(}\PYG{p}{[}\PYG{n}{lat}\PYG{o}{.}\PYG{n}{size}\PYG{p}{,} \PYG{n}{num\PYGZus{}steps\PYGZus{}per\PYGZus{}year}\PYG{p}{,} \PYG{n}{num\PYGZus{}depths}\PYG{p}{]}\PYG{p}{)}
+         \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{num\PYGZus{}depths}\PYG{p}{)}\PYG{p}{:}
+             \PYG{k}{for} \PYG{n}{m} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{num\PYGZus{}steps\PYGZus{}per\PYGZus{}year}\PYG{p}{)}\PYG{p}{:}
+                 \PYG{n}{models\PYGZus{}highobl}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{o}{.}\PYG{n}{step\PYGZus{}forward}\PYG{p}{(}\PYG{p}{)}
+                 \PYG{n}{Tyear\PYGZus{}highobl}\PYG{p}{[}\PYG{p}{:}\PYG{p}{,}\PYG{n}{m}\PYG{p}{,}\PYG{n}{n}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{squeeze}\PYG{p}{(}\PYG{n}{models\PYGZus{}highobl}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{o}{.}\PYG{n}{state}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Ts}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+Integrating for 90 steps, 365.2422 days, or 1.0 years.
+Total elapsed time is 41.0 years.
+Integrating for 90 steps, 365.2422 days, or 1.0 years.
+Total elapsed time is 41.0 years.
+Integrating for 90 steps, 365.2422 days, or 1.0 years.
+Total elapsed time is 41.0 years.
+\end{OriginalVerbatim}
+And plot the seasonal temperature cycle same as we did above:
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [16]: }\PYG{n}{fig} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(} \PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{20}\PYG{p}{,}\PYG{l+m+mi}{5}\PYG{p}{)} \PYG{p}{)}
+         \PYG{n}{Tmax\PYGZus{}highobl} \PYG{o}{=} \PYG{l+m+mi}{125}\PYG{p}{;} \PYG{n}{Tmin\PYGZus{}highobl} \PYG{o}{=} \PYG{o}{\PYGZhy{}}\PYG{n}{Tmax\PYGZus{}highobl}\PYG{p}{;} \PYG{n}{delT\PYGZus{}highobl} \PYG{o}{=} \PYG{l+m+mi}{10}
+         \PYG{n}{clevels\PYGZus{}highobl} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{n}{Tmin\PYGZus{}highobl}\PYG{p}{,} \PYG{n}{Tmax\PYGZus{}highobl}\PYG{o}{+}\PYG{n}{delT\PYGZus{}highobl}\PYG{p}{,} \PYG{n}{delT\PYGZus{}highobl}\PYG{p}{)}
+         
+         \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{num\PYGZus{}depths}\PYG{p}{)}\PYG{p}{:}
+             \PYG{n}{ax} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{n}{num\PYGZus{}depths}\PYG{p}{,}\PYG{n}{n}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{)}
+             \PYG{n}{cax} \PYG{o}{=} \PYG{n}{ax}\PYG{o}{.}\PYG{n}{contourf}\PYG{p}{(} \PYG{l+m+mi}{4}\PYG{o}{*}\PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{n}{num\PYGZus{}steps\PYGZus{}per\PYGZus{}year}\PYG{p}{)}\PYG{p}{,} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{Tyear\PYGZus{}highobl}\PYG{p}{[}\PYG{p}{:}\PYG{p}{,}\PYG{p}{:}\PYG{p}{,}\PYG{n}{n}\PYG{p}{]}\PYG{p}{,}
+                 \PYG{n}{levels}\PYG{o}{=}\PYG{n}{clevels\PYGZus{}highobl}\PYG{p}{,} \PYG{n}{cmap}\PYG{o}{=}\PYG{n}{plt}\PYG{o}{.}\PYG{n}{cm}\PYG{o}{.}\PYG{n}{seismic}\PYG{p}{,} \PYG{n}{vmin}\PYG{o}{=}\PYG{n}{Tmin\PYGZus{}highobl}\PYG{p}{,} \PYG{n}{vmax}\PYG{o}{=}\PYG{n}{Tmax\PYGZus{}highobl} \PYG{p}{)}
+             \PYG{n}{cbar1} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{colorbar}\PYG{p}{(}\PYG{n}{cax}\PYG{p}{)}
+             \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{water\PYGZus{}depth = }\PYG{l+s+s1}{\PYGZsq{}} \PYG{o}{+} \PYG{n+nb}{str}\PYG{p}{(}\PYG{n}{models\PYGZus{}highobl}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}\PYG{o}{.}\PYG{n}{param}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{water\PYGZus{}depth}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)} \PYG{o}{+} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{ meters}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{20} \PYG{p}{)}
+             \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Days of year}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+             \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+         
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Seasonal_cycle_and_heat_capacity_35_0}.png}
+
+Note that the temperature range is much larger than for the Earth-like
+case above (but same contour interval, 10 degC).
+
+Why is the temperature so uniform in the north-south direction with 50
+meters of water?
+
+To see the reason, let's plot the annual mean insolation at 90º
+obliquity, alongside the present-day annual mean insolation:
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [17]: }\PYG{n}{lat2} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,} \PYG{l+m+mi}{90}\PYG{p}{,} \PYG{l+m+mi}{181}\PYG{p}{)}
+         \PYG{n}{days} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{l+m+mf}{1.}\PYG{p}{,}\PYG{l+m+mf}{50.}\PYG{p}{)}\PYG{o}{/}\PYG{l+m+mi}{50} \PYG{o}{*} \PYG{n}{const}\PYG{o}{.}\PYG{n}{days\PYGZus{}per\PYGZus{}year}
+         \PYG{n}{Q\PYGZus{}present} \PYG{o}{=} \PYG{n}{daily\PYGZus{}insolation}\PYG{p}{(} \PYG{n}{lat2}\PYG{p}{,} \PYG{n}{days} \PYG{p}{)}
+         \PYG{n}{Q\PYGZus{}highobl} \PYG{o}{=} \PYG{n}{daily\PYGZus{}insolation}\PYG{p}{(} \PYG{n}{lat2}\PYG{p}{,} \PYG{n}{days}\PYG{p}{,} \PYG{n}{orb\PYGZus{}highobl} \PYG{p}{)}
+         \PYG{n}{Q\PYGZus{}present\PYGZus{}ann} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(} \PYG{n}{Q\PYGZus{}present}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{1} \PYG{p}{)}
+         \PYG{n}{Q\PYGZus{}highobl\PYGZus{}ann} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(} \PYG{n}{Q\PYGZus{}highobl}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{1} \PYG{p}{)}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [18]: }\PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{lat2}\PYG{p}{,} \PYG{n}{Q\PYGZus{}present\PYGZus{}ann}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Earth}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{lat2}\PYG{p}{,} \PYG{n}{Q\PYGZus{}highobl\PYGZus{}ann}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{90deg obliquity}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{(}\PYG{n}{loc}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{lower center}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{W m\PYGZdl{}\PYGZca{}\PYGZob{}\PYGZhy{}2\PYGZcb{}\PYGZdl{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{14} \PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Annual mean insolation for two different obliquities}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Seasonal_cycle_and_heat_capacity_39_0}.png}
+
+Though this is a bit misleading, because our model prescribes an
+increase in albedo from the equator to the pole. So the absorbed
+shortwave gradients look even more different.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [ ]: }
+        
+\end{OriginalVerbatim}
+
+
+\section{Ice - Albedo Feedback and runaway glaciation}
+\label{notebooks/Snowball_Earth_in_the_EBM:Ice---Albedo-Feedback-and-runaway-glaciation}\label{notebooks/Snowball_Earth_in_the_EBM::doc}
+Here we will use the 1-dimensional diffusive Energy Balance Model (EBM)
+to explore the effects of albedo feedback and heat transport on climate
+sensitivity.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [1]: }\PYG{o}{\PYGZpc{}}\PYG{k}{matplotlib} inline
+        \PYG{k+kn}{import} \PYG{n+nn}{numpy} \PYG{k+kn}{as} \PYG{n+nn}{np}
+        \PYG{k+kn}{import} \PYG{n+nn}{matplotlib.pyplot} \PYG{k+kn}{as} \PYG{n+nn}{plt}
+        \PYG{k+kn}{import} \PYG{n+nn}{climlab}
+        \PYG{k+kn}{from} \PYG{n+nn}{climlab} \PYG{k+kn}{import} \PYG{n}{constants} \PYG{k}{as} \PYG{n}{const}
+        \PYG{k+kn}{from} \PYG{n+nn}{climlab} \PYG{k+kn}{import} \PYG{n}{legendre}
+        \PYG{k+kn}{from} \PYG{n+nn}{climlab.domain.field} \PYG{k+kn}{import} \PYG{n}{global\PYGZus{}mean}
+\end{OriginalVerbatim}
+
+
+\subsection{Annual-mean model with albedo feedback: adjustment to equilibrium}
+\label{notebooks/Snowball_Earth_in_the_EBM:Annual-mean-model-with-albedo-feedback:-adjustment-to-equilibrium}
+A version of the EBM in which albedo adjusts to the current position of
+the ice line, wherever \(T < T_f\)
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [2]: }\PYG{n}{model1} \PYG{o}{=} \PYG{n}{climlab}\PYG{o}{.}\PYG{n}{EBM\PYGZus{}annual}\PYG{p}{(} \PYG{n}{num\PYGZus{}points} \PYG{o}{=} \PYG{l+m+mi}{180}\PYG{p}{,} \PYG{n}{a0}\PYG{o}{=}\PYG{l+m+mf}{0.3}\PYG{p}{,} \PYG{n}{a2}\PYG{o}{=}\PYG{l+m+mf}{0.078}\PYG{p}{,} \PYG{n}{ai}\PYG{o}{=}\PYG{l+m+mf}{0.62}\PYG{p}{)}
+        \PYG{k}{print} \PYG{n}{model1}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+climlab Process of type <class 'climlab.model.ebm.EBM_annual'>.
+State variables and domain shapes:
+  Ts: (90, 1)
+The subprocess tree:
+top: <class 'climlab.model.ebm.EBM_annual'>
+   diffusion: <class 'climlab.dynamics.diffusion.MeridionalDiffusion'>
+   LW: <class 'climlab.radiation.AplusBT.AplusBT'>
+   albedo: <class 'climlab.surface.albedo.StepFunctionAlbedo'>
+      iceline: <class 'climlab.surface.albedo.Iceline'>
+      cold_albedo: <class 'climlab.surface.albedo.ConstantAlbedo'>
+      warm_albedo: <class 'climlab.surface.albedo.P2Albedo'>
+   insolation: <class 'climlab.radiation.insolation.AnnualMeanInsolation'>
+\end{OriginalVerbatim}
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [3]: }\PYG{n}{model1}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mi}{5}\PYG{p}{)}
+        \PYG{n}{Tequil} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{model1}\PYG{o}{.}\PYG{n}{Ts}\PYG{p}{)}
+        \PYG{n}{ALBequil} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{model1}\PYG{o}{.}\PYG{n}{albedo}\PYG{p}{)}
+        \PYG{n}{OLRequil} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{model1}\PYG{o}{.}\PYG{n}{OLR}\PYG{p}{)}
+        \PYG{n}{ASRequil} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{model1}\PYG{o}{.}\PYG{n}{ASR}\PYG{p}{)}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+Integrating for 450 steps, 1826.211 days, or 5 years.
+Total elapsed time is 5.0 years.
+\end{OriginalVerbatim}
+Let's look at what happens if we perturb the temperature -- make it 20ºC
+colder everywhere!
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [4]: }\PYG{n}{model1}\PYG{o}{.}\PYG{n}{Ts} \PYG{o}{\PYGZhy{}}\PYG{o}{=} \PYG{l+m+mf}{20.}
+        \PYG{n}{model1}\PYG{o}{.}\PYG{n}{compute\PYGZus{}diagnostics}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+Let's take a look at how we have just perturbed the absorbed shortwave:
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [5]: }\PYG{n}{my\PYGZus{}ticks} \PYG{o}{=} \PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{60}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{30}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{30}\PYG{p}{,}\PYG{l+m+mi}{60}\PYG{p}{,}\PYG{l+m+mi}{90}\PYG{p}{]}
+        \PYG{n}{lat} \PYG{o}{=} \PYG{n}{model1}\PYG{o}{.}\PYG{n}{domains}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Ts}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{axes}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{lat}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{points}
+        
+        \PYG{n}{fig} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(} \PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{12}\PYG{p}{,}\PYG{l+m+mi}{5}\PYG{p}{)} \PYG{p}{)}
+        
+        \PYG{n}{ax1} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}
+        \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{lat}\PYG{p}{,} \PYG{n}{Tequil}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{equil}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+        \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{lat}\PYG{p}{,} \PYG{n}{model1}\PYG{o}{.}\PYG{n}{Ts}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{pert}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+        \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{p}{)}
+        \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{(}\PYG{p}{)}
+        \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,}\PYG{l+m+mi}{90}\PYG{p}{)}
+        \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{set\PYGZus{}xticks}\PYG{p}{(}\PYG{n}{my\PYGZus{}ticks}\PYG{p}{)}
+        \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+        \PYG{n}{ax1}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Temperature (degC)}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+        
+        \PYG{n}{ax2} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{)}
+        \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{ASRequil}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{equil}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+        \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{model1}\PYG{o}{.}\PYG{n}{ASR}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{pert}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+        \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{p}{)}
+        \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{(}\PYG{p}{)}
+        \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,}\PYG{l+m+mi}{90}\PYG{p}{)}
+        \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}xticks}\PYG{p}{(}\PYG{n}{my\PYGZus{}ticks}\PYG{p}{)}
+        \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+        \PYG{n}{ax2}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{ASR (W m\PYGZdl{}\PYGZca{}\PYGZob{}\PYGZhy{}2\PYGZcb{}\PYGZdl{})}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+        
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Snowball_Earth_in_the_EBM_10_0}.png}
+
+So there is less absorbed shortwave now, because of the increased
+albedo. The global mean difference is:
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [6]: }\PYG{n}{global\PYGZus{}mean}\PYG{p}{(} \PYG{n}{model1}\PYG{o}{.}\PYG{n}{ASR} \PYG{o}{\PYGZhy{}} \PYG{n}{ASRequil} \PYG{p}{)}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxout}{Out[6]: }Field(\PYGZhy{}20.37046205447195)
+\end{OriginalVerbatim}
+
+Less shortwave means that there is a tendency for the climate to cool
+down even more! In other words, the shortwave feedback is \textbf{positive}.
+
+Recall that the net feedback for the EBM can be written
+
+\(\lambda = - B + \frac{\Delta <(1-\alpha) Q >}{\Delta <T>}\)
+
+where the second term is the change in the absorbed shortwave per degree
+global mean temperature change.
+
+Plugging these numbers in gives
+
+\(\lambda = - 2 + \frac{-20.4}{-20} = -2 + 1 = -1\) W
+m\(^{-2}\) \(^{\circ}\)C\(^{-1}\)
+
+The feedback is negative, as we expect! The tendency to warm up from
+reduced OLR outweighs the tendency to cool down from reduced ASR. A
+negative net feedback means that the system will relax back towards the
+equilibrium.
+
+Let's let the temperature evolve one year at a time and add extra lines
+to the graph:
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [7]: }\PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{Tequil}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{k\PYGZhy{}\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{equil}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{model1}\PYG{o}{.}\PYG{n}{Ts}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{k\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{pert}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,}\PYG{l+m+mi}{90}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{(}\PYG{p}{)}
+        
+        \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{5}\PYG{p}{)}\PYG{p}{:}
+            \PYG{n}{model1}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{n}{years}\PYG{o}{=}\PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{n}{verbose}\PYG{o}{=}\PYG{n+nb+bp}{False}\PYG{p}{)}
+            \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{lat}\PYG{p}{,} \PYG{n}{model1}\PYG{o}{.}\PYG{n}{Ts}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Snowball_Earth_in_the_EBM_15_0}.png}
+
+Temperature drifts back towards equilibrium, as we expected!
+
+What if we cool the climate \textbf{so much} that the entire planet is ice
+covered?
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [8]: }\PYG{n}{model1}\PYG{o}{.}\PYG{n}{Ts} \PYG{o}{\PYGZhy{}}\PYG{o}{=} \PYG{l+m+mf}{40.}
+        \PYG{n}{model1}\PYG{o}{.}\PYG{n}{compute\PYGZus{}diagnostics}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+Look again at the change in absorbed shortwave:
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [9]: }\PYG{n}{global\PYGZus{}mean}\PYG{p}{(} \PYG{n}{model1}\PYG{o}{.}\PYG{n}{ASR} \PYG{o}{\PYGZhy{}} \PYG{n}{ASRequil} \PYG{p}{)}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxout}{Out[9]: }Field(\PYGZhy{}108.99200830729608)
+\end{OriginalVerbatim}
+
+It's much larger because we've covered so much more surface area with
+ice!
+
+The feedback calculation now looks like
+
+\(\lambda = - 2 + \frac{-109}{-40} = -2 + 2.7 = +0.7\) W
+m\(^{-2}\) \(^{\circ}\)C\(^{-1}\)
+
+What? Looks like the \textbf{positive} albedo feedback is so strong here that
+it has outweighed the \textbf{negative} longwave feedback. What will happen
+to the system now? Let's find out...
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [10]: }\PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{Tequil}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{k\PYGZhy{}\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{equil}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{lat}\PYG{p}{,} \PYG{n}{model1}\PYG{o}{.}\PYG{n}{Ts}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{k\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{pert}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,}\PYG{l+m+mi}{90}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{(}\PYG{p}{)}
+         
+         \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{5}\PYG{p}{)}\PYG{p}{:}
+             \PYG{n}{model1}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{n}{years}\PYG{o}{=}\PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{n}{verbose}\PYG{o}{=}\PYG{n+nb+bp}{False}\PYG{p}{)}
+             \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{lat}\PYG{p}{,} \PYG{n}{model1}\PYG{o}{.}\PYG{n}{Ts}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Snowball_Earth_in_the_EBM_22_0}.png}
+
+Something \textbf{very different} happened! The climate drifted towards an
+entirely different equilibrium state, in which the entire planet is cold
+and ice-covered.
+
+We will refer to this as the \textbf{SNOWBALL EARTH}.
+
+Note that the warmest spot on the planet is still the equator, but it is
+now about -33ºC rather than +28ºC!
+
+
+\subsection{Here Comes the Sun! Where is the ice edge?}
+\label{notebooks/Snowball_Earth_in_the_EBM:Here-Comes-the-Sun!-Where-is-the-ice-edge?}
+The ice edge in our model is always where the temperature crosses
+\(T_f = -10^\circ\)C. The system is at \textbf{equilibrium} when the
+temperature is such that there is a balance between ASR, OLR, and heat
+transport convergence everywhere.
+
+Suppose that sun was hotter or cooler at different times (in fact it was
+significantly cooler during early Earth history). That would mean that
+the solar constant \(S_0 = 4Q\) was larger or smaller. We should
+expect that the temperature (and thus the ice edge) should increase and
+decrease as we change \(S_0\).
+
+\(S_0\) during the Neoproterozoic Snowball Earth events is believed
+to be about 93\% of its present-day value, or about 1270 W
+m\(^{-2}\).
+
+We are going to look at how the \textbf{equilibrium} ice edge depends on
+\(S_0\), by integrating the model out to equilibrium for lots of
+different values of \(S_0\). We will start by slowly decreasing
+\(S_0\), and then slowly increasing \(S_0\).
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [11]: }\PYG{n}{model2} \PYG{o}{=} \PYG{n}{climlab}\PYG{o}{.}\PYG{n}{EBM\PYGZus{}annual}\PYG{p}{(}\PYG{n}{num\PYGZus{}points} \PYG{o}{=} \PYG{l+m+mi}{360}\PYG{p}{,} \PYG{n}{a0}\PYG{o}{=}\PYG{l+m+mf}{0.3}\PYG{p}{,} \PYG{n}{a2}\PYG{o}{=}\PYG{l+m+mf}{0.078}\PYG{p}{,} \PYG{n}{ai}\PYG{o}{=}\PYG{l+m+mf}{0.62}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [12]: }\PYG{n}{S0array} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{l+m+mf}{1400.}\PYG{p}{,} \PYG{l+m+mf}{1200.}\PYG{p}{,} \PYG{l+m+mf}{200.}\PYG{p}{)}
+         \PYG{c+c1}{\PYGZsh{}S0array = np.linspace(1400., 1200., 10.)}
+         \PYG{c+c1}{\PYGZsh{}print S0array}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [13]: }\PYG{n}{model2}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mi}{5}\PYG{p}{)}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+Integrating for 450 steps, 1826.211 days, or 5 years.
+Total elapsed time is 5.0 years.
+\end{OriginalVerbatim}
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [14]: }\PYG{k}{print} \PYG{n}{model2}\PYG{o}{.}\PYG{n}{icelat}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+[-70.  70.]
+\end{OriginalVerbatim}
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [15]: }\PYG{n}{icelat\PYGZus{}cooling} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{empty\PYGZus{}like}\PYG{p}{(}\PYG{n}{S0array}\PYG{p}{)}
+         \PYG{n}{icelat\PYGZus{}warming} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{empty\PYGZus{}like}\PYG{p}{(}\PYG{n}{S0array}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [16]: }\PYG{c+c1}{\PYGZsh{} First cool....}
+         \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{S0array}\PYG{o}{.}\PYG{n}{size}\PYG{p}{)}\PYG{p}{:}
+             \PYG{n}{model2}\PYG{o}{.}\PYG{n}{subprocess}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{insolation}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{S0} \PYG{o}{=} \PYG{n}{S0array}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}
+             \PYG{n}{model2}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mi}{10}\PYG{p}{,} \PYG{n}{verbose}\PYG{o}{=}\PYG{n+nb+bp}{False}\PYG{p}{)}
+             \PYG{n}{icelat\PYGZus{}cooling}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{model2}\PYG{o}{.}\PYG{n}{icelat}\PYG{p}{)}
+         \PYG{c+c1}{\PYGZsh{} Then warm...}
+         \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{S0array}\PYG{o}{.}\PYG{n}{size}\PYG{p}{)}\PYG{p}{:}
+             \PYG{n}{model2}\PYG{o}{.}\PYG{n}{subprocess}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{insolation}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{S0} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{flipud}\PYG{p}{(}\PYG{n}{S0array}\PYG{p}{)}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}
+             \PYG{n}{model2}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mi}{10}\PYG{p}{,} \PYG{n}{verbose}\PYG{o}{=}\PYG{n+nb+bp}{False}\PYG{p}{)}
+             \PYG{n}{icelat\PYGZus{}warming}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{model2}\PYG{o}{.}\PYG{n}{icelat}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+For completeness: also start from present-day conditions and warm up.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [17]: }\PYG{n}{model3} \PYG{o}{=} \PYG{n}{climlab}\PYG{o}{.}\PYG{n}{EBM\PYGZus{}annual}\PYG{p}{(}\PYG{n}{num\PYGZus{}points} \PYG{o}{=} \PYG{l+m+mi}{360}\PYG{p}{,} \PYG{n}{a0}\PYG{o}{=}\PYG{l+m+mf}{0.3}\PYG{p}{,} \PYG{n}{a2}\PYG{o}{=}\PYG{l+m+mf}{0.078}\PYG{p}{,} \PYG{n}{ai}\PYG{o}{=}\PYG{l+m+mf}{0.62}\PYG{p}{)}
+         \PYG{n}{S0array3} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{l+m+mf}{1350.}\PYG{p}{,} \PYG{l+m+mf}{1400.}\PYG{p}{,} \PYG{l+m+mf}{50.}\PYG{p}{)}
+         \PYG{c+c1}{\PYGZsh{}S0array3 = np.linspace(1350., 1400., 5.)}
+         \PYG{n}{icelat3} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{empty\PYGZus{}like}\PYG{p}{(}\PYG{n}{S0array3}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [18]: }\PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{S0array3}\PYG{o}{.}\PYG{n}{size}\PYG{p}{)}\PYG{p}{:}
+             \PYG{n}{model3}\PYG{o}{.}\PYG{n}{subprocess}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{insolation}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{S0} \PYG{o}{=} \PYG{n}{S0array3}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}
+             \PYG{n}{model3}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mi}{10}\PYG{p}{,} \PYG{n}{verbose}\PYG{o}{=}\PYG{n+nb+bp}{False}\PYG{p}{)}
+             \PYG{n}{icelat3}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{model3}\PYG{o}{.}\PYG{n}{icelat}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [19]: }\PYG{n}{fig} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(} \PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{10}\PYG{p}{,}\PYG{l+m+mi}{6}\PYG{p}{)} \PYG{p}{)}
+         \PYG{n}{ax} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{111}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{S0array}\PYG{p}{,} \PYG{n}{icelat\PYGZus{}cooling}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{r\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cooling}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{S0array}\PYG{p}{,} \PYG{n}{icelat\PYGZus{}warming}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{b\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{warming}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{S0array3}\PYG{p}{,} \PYG{n}{icelat3}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{g\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{warming}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{10}\PYG{p}{,}\PYG{l+m+mi}{100}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}yticks}\PYG{p}{(}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{15}\PYG{p}{,}\PYG{l+m+mi}{30}\PYG{p}{,}\PYG{l+m+mi}{45}\PYG{p}{,}\PYG{l+m+mi}{60}\PYG{p}{,}\PYG{l+m+mi}{75}\PYG{p}{,}\PYG{l+m+mi}{90}\PYG{p}{)}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Ice edge latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Solar constant (W m\PYGZdl{}\PYGZca{}\PYGZob{}\PYGZhy{}2\PYGZcb{}\PYGZdl{})}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{p}{[}\PYG{n}{const}\PYG{o}{.}\PYG{n}{S0}\PYG{p}{,} \PYG{n}{const}\PYG{o}{.}\PYG{n}{S0}\PYG{p}{]}\PYG{p}{,} \PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{10}\PYG{p}{,} \PYG{l+m+mi}{100}\PYG{p}{]}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{k\PYGZhy{}\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{present\PYGZhy{}day}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{(}\PYG{n}{loc}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{upper left}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Solar constant versus ice edge latitude in the EBM with albedo feedback}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Snowball_Earth_in_the_EBM_35_0}.png}
+
+There are actually up to 3 different climates possible for a given value
+of \(S_0\)!
+
+
+\subsubsection{How to un-freeze the Snowball}
+\label{notebooks/Snowball_Earth_in_the_EBM:How-to-un-freeze-the-Snowball}
+The graph indicates that if the Earth were completely frozen over, it
+would be perfectly happy to stay that way even if the sun were brighter
+and hotter than it is today.
+
+Our EBM predicts that (with present-day parameters) the equilibrium
+temperature at the equator in the Snowball state is about -33ºC, which
+is much colder than the threshold temperature
+\(T_f = -10^\circ\)C. How can we melt the Snowball?
+
+We need to increase the avaible energy sufficiently to get the
+equatorial temperatures above this threshold! That is going to require a
+much larger increase in \(S_0\) (could also increase the greenhouse
+gases, which would have a similar effect)!
+
+Let's crank up the sun to 1830 W m\(^{-2}\) (about a 34\% increase
+from present-day).
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [20]: }\PYG{k+kn}{from} \PYG{n+nn}{climlab.process.process} \PYG{k+kn}{import} \PYG{n}{process\PYGZus{}like}
+         
+         \PYG{n}{model4} \PYG{o}{=} \PYG{n}{process\PYGZus{}like}\PYG{p}{(}\PYG{n}{model2}\PYG{p}{)}  \PYG{c+c1}{\PYGZsh{} initialize with cold Snowball temperature}
+         \PYG{n}{model4}\PYG{o}{.}\PYG{n}{subprocess}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{insolation}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{S0} \PYG{o}{=} \PYG{l+m+mf}{1830.}
+         \PYG{n}{model4}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mi}{40}\PYG{p}{)}
+         
+         \PYG{c+c1}{\PYGZsh{}lat = model4.domains[\PYGZsq{}Ts\PYGZsq{}].axes[\PYGZsq{}lat\PYGZsq{}].points}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{model4}\PYG{o}{.}\PYG{n}{lat}\PYG{p}{,} \PYG{n}{model4}\PYG{o}{.}\PYG{n}{Ts}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,}\PYG{l+m+mi}{90}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Temperature}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xticks}\PYG{p}{(}\PYG{n}{my\PYGZus{}ticks}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+         
+         \PYG{k}{print}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{The ice edge is at }\PYG{l+s+s1}{\PYGZsq{}} \PYG{o}{+} \PYG{n+nb}{str}\PYG{p}{(}\PYG{n}{model4}\PYG{o}{.}\PYG{n}{icelat}\PYG{p}{)} \PYG{o}{+} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{degrees latitude.}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+Integrating for 3600 steps, 14609.688 days, or 40 years.
+Total elapsed time is 4044.99999998 years.
+\end{OriginalVerbatim}
+\includegraphics{{notebooks_Snowball_Earth_in_the_EBM_39_1}.png}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+The ice edge is at [-0.  0.]degrees latitude.
+\end{OriginalVerbatim}
+Still a Snowball... but just barely! The temperature at the equator is
+just below the threshold.
+
+Try to imagine what might happen once it starts to melt. The solar
+constant is huge, and if it weren't for the highly reflective ice and
+snow, the climate would be really really hot!
+
+We're going to increase \(S_0\) one more time...
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [21]: }\PYG{n}{model4}\PYG{o}{.}\PYG{n}{subprocess}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{insolation}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{S0} \PYG{o}{=} \PYG{l+m+mf}{1845.}
+         \PYG{n}{model4}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mi}{10}\PYG{p}{)}
+         
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{lat}\PYG{p}{,} \PYG{n}{model4}\PYG{o}{.}\PYG{n}{state}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Ts}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{90}\PYG{p}{,}\PYG{l+m+mi}{90}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Temperature}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xticks}\PYG{p}{(}\PYG{n}{my\PYGZus{}ticks}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+Integrating for 900 steps, 3652.422 days, or 10 years.
+Total elapsed time is 4054.99999998 years.
+\end{OriginalVerbatim}
+\includegraphics{{notebooks_Snowball_Earth_in_the_EBM_41_1}.png}
+
+Suddenly the climate looks very very different again! The global mean
+temperature is
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [22]: }\PYG{k}{print}\PYG{p}{(} \PYG{n}{model4}\PYG{o}{.}\PYG{n}{global\PYGZus{}mean\PYGZus{}temperature}\PYG{p}{(}\PYG{p}{)} \PYG{p}{)}
+\end{OriginalVerbatim}
+% This comment is needed to force a line break for adjacent ANSI cells
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+58.171701295
+\end{OriginalVerbatim}
+A roasty 60ºC, and the poles are above 20ºC. A tiny increase in
+\(S_0\) has led to a very drastic change in the climate.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [23]: }\PYG{n}{S0array\PYGZus{}snowballmelt} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{l+m+mf}{1400.}\PYG{p}{,} \PYG{l+m+mf}{1900.}\PYG{p}{,} \PYG{l+m+mi}{50}\PYG{p}{)}
+         \PYG{n}{icelat\PYGZus{}snowballmelt} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{empty\PYGZus{}like}\PYG{p}{(}\PYG{n}{S0array\PYGZus{}snowballmelt}\PYG{p}{)}
+         \PYG{n}{icelat\PYGZus{}snowballmelt\PYGZus{}cooling} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{empty\PYGZus{}like}\PYG{p}{(}\PYG{n}{S0array\PYGZus{}snowballmelt}\PYG{p}{)}
+         
+         \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{S0array\PYGZus{}snowballmelt}\PYG{o}{.}\PYG{n}{size}\PYG{p}{)}\PYG{p}{:}
+             \PYG{n}{model2}\PYG{o}{.}\PYG{n}{subprocess}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{insolation}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{S0} \PYG{o}{=} \PYG{n}{S0array\PYGZus{}snowballmelt}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}
+             \PYG{n}{model2}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mi}{10}\PYG{p}{,} \PYG{n}{verbose}\PYG{o}{=}\PYG{n+nb+bp}{False}\PYG{p}{)}
+             \PYG{n}{icelat\PYGZus{}snowballmelt}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{model2}\PYG{o}{.}\PYG{n}{diagnostics}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{icelat}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+         
+         \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{S0array\PYGZus{}snowballmelt}\PYG{o}{.}\PYG{n}{size}\PYG{p}{)}\PYG{p}{:}
+             \PYG{n}{model2}\PYG{o}{.}\PYG{n}{subprocess}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{insolation}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{S0} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{flipud}\PYG{p}{(}\PYG{n}{S0array\PYGZus{}snowballmelt}\PYG{p}{)}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]}
+             \PYG{n}{model2}\PYG{o}{.}\PYG{n}{integrate\PYGZus{}years}\PYG{p}{(}\PYG{l+m+mi}{10}\PYG{p}{,} \PYG{n}{verbose}\PYG{o}{=}\PYG{n+nb+bp}{False}\PYG{p}{)}
+             \PYG{n}{icelat\PYGZus{}snowballmelt\PYGZus{}cooling}\PYG{p}{[}\PYG{n}{n}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{model2}\PYG{o}{.}\PYG{n}{diagnostics}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{icelat}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+Now we will complete the plot of ice edge versus solar constant.
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [24]: }\PYG{n}{fig} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(} \PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{10}\PYG{p}{,}\PYG{l+m+mi}{6}\PYG{p}{)} \PYG{p}{)}
+         \PYG{n}{ax} \PYG{o}{=} \PYG{n}{fig}\PYG{o}{.}\PYG{n}{add\PYGZus{}subplot}\PYG{p}{(}\PYG{l+m+mi}{111}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{S0array}\PYG{p}{,} \PYG{n}{icelat\PYGZus{}cooling}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{r\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cooling}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{S0array}\PYG{p}{,} \PYG{n}{icelat\PYGZus{}warming}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{b\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{warming}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{S0array3}\PYG{p}{,} \PYG{n}{icelat3}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{g\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{warming}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{S0array\PYGZus{}snowballmelt}\PYG{p}{,} \PYG{n}{icelat\PYGZus{}snowballmelt}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{b\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{S0array\PYGZus{}snowballmelt}\PYG{p}{,} \PYG{n}{icelat\PYGZus{}snowballmelt\PYGZus{}cooling}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{r\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{10}\PYG{p}{,}\PYG{l+m+mi}{100}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}yticks}\PYG{p}{(}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{15}\PYG{p}{,}\PYG{l+m+mi}{30}\PYG{p}{,}\PYG{l+m+mi}{45}\PYG{p}{,}\PYG{l+m+mi}{60}\PYG{p}{,}\PYG{l+m+mi}{75}\PYG{p}{,}\PYG{l+m+mi}{90}\PYG{p}{)}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Ice edge latitude}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Solar constant (W m\PYGZdl{}\PYGZca{}\PYGZob{}\PYGZhy{}2\PYGZcb{}\PYGZdl{})}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{p}{[}\PYG{n}{const}\PYG{o}{.}\PYG{n}{S0}\PYG{p}{,} \PYG{n}{const}\PYG{o}{.}\PYG{n}{S0}\PYG{p}{]}\PYG{p}{,} \PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{10}\PYG{p}{,} \PYG{l+m+mi}{100}\PYG{p}{]}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{k\PYGZhy{}\PYGZhy{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{present\PYGZhy{}day}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{(}\PYG{n}{loc}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{upper left}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+         \PYG{n}{ax}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Solar constant versus ice edge latitude in the EBM with albedo feedback}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{16}\PYG{p}{)}
+         \PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{OriginalVerbatim}
+
+\includegraphics{{notebooks_Snowball_Earth_in_the_EBM_47_0}.png}
+
+The upshot:
+\begin{itemize}
+\item {} 
+For extremely large \(S_0\), the only possible climate is a hot
+Earth with no ice.
+
+\item {} 
+For extremely small \(S_0\), the only possible climate is a cold
+Earth completely covered in ice.
+
+\item {} 
+For a large range of \(S_0\) including the present-day value,
+more than one climate is possible!
+
+\item {} 
+Once we get into a Snowball Earth state, getting out again is rather
+difficult!
+
+\end{itemize}
+
+\begin{OriginalVerbatim}[commandchars=\\\{\}]
+\textcolor{nbsphinxin}{In [ ]: }
+        
+\end{OriginalVerbatim}
 
 
 \chapter{Application Programming Interface}
